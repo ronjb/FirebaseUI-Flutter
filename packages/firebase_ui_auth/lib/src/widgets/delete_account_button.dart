@@ -82,31 +82,35 @@ class _DeleteAccountButtonState extends State<DeleteAccountButton> {
   fba.FirebaseAuth get auth => widget.auth ?? fba.FirebaseAuth.instance;
   bool _isLoading = false;
 
-  void Function() pop<T>(BuildContext context, T result) =>
-      () => Navigator.of(context).pop(result);
-
   Future<void> _deleteAccount() async {
-    bool? confirmed = !widget.showDeleteConfirmationDialog;
+    bool confirmed = !widget.showDeleteConfirmationDialog;
 
     if (!confirmed) {
       final l = FirebaseUILocalizations.labelsOf(context);
-
-      confirmed = await showCupertinoDialog<bool?>(
-        context: context,
-        builder: (context) {
-          return UniversalAlert(
-            onConfirm: pop(context, true),
-            onCancel: pop(context, false),
-            title: l.confirmDeleteAccountAlertTitle,
-            confirmButtonText: l.confirmDeleteAccountButtonLabel,
-            cancelButtonText: l.cancelButtonLabel,
-            message: l.confirmDeleteAccountAlertMessage,
-          );
-        },
-      );
+      confirmed = await showDialog<bool>(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text(l.confirmDeleteAccountAlertTitle),
+                content: Text(l.confirmDeleteAccountAlertMessage),
+                actions: [
+                  TextButton(
+                    child: Text(l.cancelButtonLabel),
+                    onPressed: () => Navigator.of(context).pop(false),
+                  ),
+                  TextButton(
+                    child: Text(l.confirmDeleteAccountButtonLabel,
+                        style: const TextStyle(color: Colors.red)),
+                    onPressed: () => Navigator.of(context).pop(true),
+                  ),
+                ],
+              );
+            },
+          ) ??
+          false;
     }
 
-    if (!(confirmed ?? false)) return;
+    if (!confirmed) return;
 
     setState(() {
       _isLoading = true;
