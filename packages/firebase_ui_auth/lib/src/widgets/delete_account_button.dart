@@ -52,6 +52,9 @@ class DeleteAccountButton extends StatefulWidget {
   /// [ReauthenticateDialog] is being shown.
   final SignInRequiredCallback? onSignInRequired;
 
+  /// A callback that is called if the account deletion succeeds.
+  final void Function()? onDeleteSucceeded;
+
   /// A callback that is called if the account deletion fails.
   final DeleteFailedCallback? onDeleteFailed;
 
@@ -68,6 +71,7 @@ class DeleteAccountButton extends StatefulWidget {
     super.key,
     this.auth,
     this.onSignInRequired,
+    this.onDeleteSucceeded,
     this.onDeleteFailed,
     this.variant = ButtonVariant.filled,
     this.showDeleteConfirmationDialog = false,
@@ -119,6 +123,7 @@ class _DeleteAccountButtonState extends State<DeleteAccountButton> {
     try {
       final user = auth.currentUser!;
       await auth.currentUser?.delete();
+      widget.onDeleteSucceeded?.call();
 
       FirebaseUIAction.ofType<AccountDeletedAction>(context)?.callback(
         context,
